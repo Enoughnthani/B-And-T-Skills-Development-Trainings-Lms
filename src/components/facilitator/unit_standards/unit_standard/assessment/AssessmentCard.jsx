@@ -1,6 +1,6 @@
 import { FaCalendarAlt, FaChevronRight, FaDownload, FaEdit, FaEye, FaFileAlt, FaFilePdf, FaFileWord, FaStar, FaTrash, FaUsers } from 'react-icons/fa';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { assessmentService } from "./services/AssessmentService"
+import { assessmentService } from "@/components/facilitator/unit_standards/unit_standard/assessment/services/AssessmentService"
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
