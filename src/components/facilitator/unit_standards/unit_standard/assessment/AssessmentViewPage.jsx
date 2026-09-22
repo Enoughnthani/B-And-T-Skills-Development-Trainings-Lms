@@ -3,7 +3,7 @@ import { format, isAfter, isBefore, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentPreview from './AssessmentPreview';
-import { assessmentService } from './services/assessmentService';
+import { assessmentService } from './services/AssessmentService';
 import { Dropdown } from 'react-bootstrap';
 import { useAuth } from '@/contexts/AuthContext';
 
