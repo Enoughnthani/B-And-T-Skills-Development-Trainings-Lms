@@ -5,7 +5,7 @@ import { Accordion, Button } from 'react-bootstrap';
 import AssessmentCard from './AssessmentCard';
 import SubmissionsModal from './SubmissionsModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import { assessmentService } from './services/assessmentService';
+import { assessmentService } from './services/AssessmentService';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function FacilitatorAssessmentPage() {
