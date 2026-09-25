@@ -1,59 +1,79 @@
-// AdminDashboard.jsx
-import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, ClipboardList, SquareArrowLeft } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import DashboardSidebar from '@/components/common/DashboardSidebar';
 import {
-  FaChartLine,
-  FaFolder
-} from "react-icons/fa";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-
-import LogoImage from "@/components/common/LogoImage";
+  ArrowLeft,
+  ClipboardList,
+  Folder,
+  TrendingUp,
+} from 'lucide-react';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
 
 export default function UnitStandardLayout() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation()
-  const { unitStandard } = location?.state || {}
-  const {programId} = useParams()
-  const userType = user?.role[0]?.toLowerCase()
+  const location = useLocation();
+  const { programId } = useParams();
+  const { unitStandard } = location.state || {};
 
+  const userType = user?.role?.[0]?.toLowerCase() || 'facilitator';
+  const basePath = `/user/${userType}/program-view/${programId}`;
+  const unitPath = unitStandard?.id
+    ? `${basePath}/unit-standards/${unitStandard.id}`
+    : `${basePath}/unit-standards`;
+
+  const navItems = [
+    {
+      icon: <ArrowLeft size={18} />,
+      label: 'Programme view',
+      path: basePath,
+      exact: true,
+    },
+    {
+      icon: <TrendingUp size={18} />,
+      label: 'Overview',
+      path: unitPath,
+      exact: true,
+    },
+    {
+      icon: <Folder size={18} />,
+      label: 'Content',
+      path: `${unitPath}/content`,
+    },
+    {
+      icon: <ClipboardList size={18} />,
+      label: 'Assessments',
+      path: `${unitPath}/assessments`,
+    },
+  ];
+
+  const unitStandardBadge = unitStandard ? (
+    <div className="px-3 py-2 bg-zinc-900 rounded-lg">
+      <div className="text-[10px] font-bold text-[#E30613] tracking-[0.2em] uppercase">
+        Unit standard
+      </div>
+      <div className="text-xs text-zinc-300 truncate">
+        {unitStandard.title || unitStandard.name}
+      </div>
+    </div>
+  ) : null;
 
   return (
-    <div className="min-h-screen flex text-gray-800">
+    <div className="h-screen flex text-zinc-800 bg-zinc-50 overflow-hidden">
+      <DashboardSidebar
+        menuItems={navItems}
+        roleLabel={user?.role?.[0]?.replace(/_/g, ' ') || 'Facilitator'}
+        homePath={basePath}
+        user={user}
+        onLogout={logout}
+        headerExtra={unitStandardBadge}
+      />
 
-      <aside className="hidden md:block min-w-[16rem] bg-white shadow-md border !border-gray-200 py-6 px-1.5 ">
-        <div className="flex mx-2 items-center gap-3 pb-4">
-          <LogoImage onClick={()=>navigate(`/user/${userType}`)} />
-        </div>
-
-        <ul className="p-1">
-          {[
-            { icon: <ArrowLeft size={20} className="text-blue-300" />, label: "Program View", path: `/user/${userType}/program-view/${unitStandard?.programId}`},
-            { icon: <FaChartLine size={20} className="text-blue-300" />, label: "Overview", path: '' },
-            { icon: <FaFolder size={20} className="text-amber-300" />, label: "Content", path: 'content' },
-            { icon: <ClipboardList size={20} className="text-green-300" />, label: "Assessements", path: 'assessments' },
-          ].map((item, idx) => {
-            const isLogout = item.label === "Logout";
-            return (
-              <li
-                onClick={() => { isLogout ? item.event() : navigate(item.path, { state: { unitStandard } }) }}
-                key={idx}
-                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isLogout
-                  ? "text-red-600 hover:bg-red-50 hover:text-red-700 mt-0 border-t border-gray-200"
-                  : location.pathname === item.path
-                    ? "bg-gradient-to-r from-green-50 to-green-50/50 text-green-800 border-l-4 border-green-800 font-semibold"
-                    : "text-gray-600 hover:bg-green-50/30 hover:text-green-800"
-                  }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </li>
-            );
-          })}
-        </ul>
-      </aside>
-
-      <Outlet />
+      <main
+        data-scroll-container
+        className="flex-1 min-w-0 h-screen overflow-y-auto bg-zinc-50"
+      >
+        <div className="md:hidden h-14" />
+        <Outlet />
+      </main>
     </div>
   );
 }

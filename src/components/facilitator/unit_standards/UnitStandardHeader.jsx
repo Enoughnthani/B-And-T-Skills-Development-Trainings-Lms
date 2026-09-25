@@ -1,26 +1,25 @@
-import { FaCode, FaPlus } from 'react-icons/fa';
-import { Button } from 'react-bootstrap';
+import { FaPlus } from 'react-icons/fa';
 
 export default function UnitStandardsHeader({ onAdd }) {
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 bg-blue-600 rounded-xl shadow-lg">
-              <FaCode className="text-white text-lg" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">Unit Standards</h1>
-          </div>
-          <p className="text-gray-500">Manage learnership unit standards and outcomes</p>
+    <div className="mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 mb-1">
+            Unit Standards
+          </h1>
+          <p className="text-sm text-zinc-500">
+            Manage learnership unit standards and outcomes.
+          </p>
         </div>
-        <Button
-          size="sm"
+
+        <button
           onClick={onAdd}
-          className="bg-blue-600 hover:bg-blue-700 transition-all flex items-center gap-2 rounded-lg px-4 py-2 border-0"
+          className="inline-flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-900 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors shrink-0 w-full sm:w-auto"
         >
-          <FaPlus size={14} /> Add Unit Standard
-        </Button>
+          <FaPlus size={12} />
+          Add Unit Standard
+        </button>
       </div>
     </div>
   );

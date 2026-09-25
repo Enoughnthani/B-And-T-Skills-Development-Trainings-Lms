@@ -1,4 +1,4 @@
-export const BASE_URL = "https://b-and-t-lms-backend-main.onrender.com";
+export const BASE_URL = "http://localhost:8080";
 
 
 //AUTHORIZATION

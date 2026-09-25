@@ -9,20 +9,23 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ApiResponseProvider } from './contexts/ApiResponseContext';
 import './index.css';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <StrictMode>
+  <StrictMode>
+    <BrowserRouter>
       <ThemeProvider>
         <TopLoaderProvider>
           <AuthProvider>
             <ApiResponseProvider>
+              <NotificationsProvider>
                 <ScrollToTop />
                 <App />
+              </NotificationsProvider>
             </ApiResponseProvider>
           </AuthProvider>
         </TopLoaderProvider>
       </ThemeProvider>
-    </StrictMode>
-  </BrowserRouter>
-)
+    </BrowserRouter>
+  </StrictMode>
+);

@@ -1,26 +1,25 @@
+import { apiFetch } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
-import { Badge } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 import {
   FaBook,
   FaClipboardList,
   FaUsers,
-  FaEye
 } from 'react-icons/fa';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { apiFetch } from '@/api/api';
 
 export default function FacilitatorProgramOverview() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { programId } = useParams()
-  const [program, setProgram] = useState(location?.state?.program);
+  const { programId } = useParams();
+
+  const [program, setProgram] = useState(location?.state?.program || null);
   const [stats, setStats] = useState({
     totalLearners: 0,
     activeLearners: 0,
     totalUnitStandards: 0,
-    totalAssessments: 0
+    totalAssessments: 0,
   });
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,158 +32,220 @@ export default function FacilitatorProgramOverview() {
   }, [program]);
 
   useEffect(() => {
-    if (!program) {
-      getProgram()
-    }
-  }, [location, programId])
+    if (!program) loadProgram();
+  }, [programId]);
 
-  const getProgram = async () => {
-    const data = await apiFetch(`/api/programs/${programId}`)
-    setProgram(data?.payload)
+  async function loadProgram() {
+    try {
+      const data = await apiFetch(`/api/programs/${programId}`);
+      if (data?.payload) setProgram(data.payload);
+      else setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   }
 
-  const fetchProgramStats = async () => {
+  async function fetchProgramStats() {
     try {
       const data = await apiFetch(`/api/programs/${program.id}/stats`);
-      setStats(data?.payload)
-    } catch (error) {
-      console.error('Error fetching program stats:', error);
+      if (data?.payload) setStats(data.payload);
+    } catch {
+      // ignore
     }
-  };
+  }
 
-  const fetchRecentActivities = async () => {
+  async function fetchRecentActivities() {
     try {
-      const activities = await apiFetch(`/api/activities/program/${program.id}?limit=5`);
-      setRecentActivities(activities || []);
-    } catch (error) {
-      console.error('Error fetching activities:', error);
+      const data = await apiFetch(
+        `/api/activities/program/${program.id}?limit=5`
+      );
+      setRecentActivities(data?.payload || data || []);
+    } catch {
+      // ignore
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const getGreeting = () => {
+  function getGreeting() {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
 
-  const getProgramType = () => {
-    return program?.category === "LEARNERSHIP" ? "Learnership" : "Short Course";
-  };
+  function getProgramType() {
+    return program?.category === 'LEARNERSHIP' ? 'Learnership' : 'Short Course';
+  }
 
-  if (loading) {
+  function formatRelative(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMin = Math.floor((now - date) / 60000);
+    const diffHrs = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHrs / 24);
+
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-ZA', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  if (loading && !program) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="p-8 flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-zinc-200 border-t-[#E30613]" />
+          <p className="mt-3 text-sm text-zinc-500">Loading programme…</p>
+        </div>
       </div>
     );
   }
 
+  const stats_cards = [
+    {
+      label: 'Total learners',
+      value: stats.totalLearners,
+      sub: `${stats.activeLearners || 0} active`,
+      icon: FaUsers,
+      accent: true,
+    },
+    {
+      label: 'Unit standards',
+      value: stats.totalUnitStandards,
+      sub: 'In this programme',
+      icon: FaBook,
+    },
+    {
+      label: 'Assessments',
+      value: stats.totalAssessments,
+      sub: 'Scheduled',
+      icon: FaClipboardList,
+    },
+  ];
+
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-gray-50">
-      <div className="max-w-7xl mx-auto p-8">
+    <div className="p-4 sm:p-6 lg:p-8 w-full">
 
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">📚</span>
-                <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                  {getGreeting()}, {user?.firstname || 'Facilitator'}!
-                </span>
-                <Badge bg="secondary">{getProgramType()}</Badge>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                {program?.name}
-              </h1>
-              <p className="text-gray-500 mt-1">Monitor content delivery and learner engagement</p>
-            </div>
-          </div>
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <span className="text-xs font-bold text-[#E30613] tracking-[0.15em] uppercase">
+            {getGreeting()}, {user?.firstname || 'Facilitator'}
+          </span>
+          <span className="text-[10px] font-bold bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded uppercase tracking-wider">
+            {getProgramType()}
+          </span>
         </div>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 mb-1 truncate">
+          {program?.name || 'Programme'}
+        </h1>
+        <p className="text-sm text-zinc-500">
+          Monitor content delivery and learner engagement.
+        </p>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                <FaUsers className="text-blue-500 text-lg" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800">{stats.totalLearners}</p>
-                <p className="text-sm text-gray-500">Total Learners</p>
-                <p className="text-xs text-gray-400">{stats.activeLearners} active</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <FaBook className="text-emerald-500 text-lg" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800">{stats.totalUnitStandards}</p>
-                <p className="text-sm text-gray-500">Unit Standards</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                <FaClipboardList className="text-amber-500 text-lg" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800">{stats.totalAssessments}</p>
-                <p className="text-sm text-gray-500">Assessments</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mb-6">
-          <div className="px-5 py-3 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-800">Recent Activity</h3>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {recentActivities.length === 0 ? (
-              <div className="p-6 text-center text-gray-400">No recent activities</div>
-            ) : (
-              recentActivities.map((activity) => (
-                <div key={activity.id} className="px-5 py-3 flex items-center gap-3 hover:bg-gray-50">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-700">{activity.description}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {new Date(activity.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="px-5 py-2 bg-gray-50 border-t border-gray-100 text-right">
-            <button
-              onClick={() => navigate('activities', { state: { program } })}
-              className="text-sm text-blue-600 hover:text-blue-700"
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        {stats_cards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={i}
+              className="bg-white border border-zinc-200 rounded-xl p-4"
             >
-              View All →
-            </button>
-          </div>
+              <div
+                className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${
+                  card.accent ? 'bg-red-50' : 'bg-zinc-100'
+                }`}
+              >
+                <Icon
+                  className={card.accent ? 'text-[#E30613]' : 'text-zinc-600'}
+                  size={14}
+                />
+              </div>
+              <div
+                className={`text-2xl font-extrabold tabular-nums mb-0.5 ${
+                  card.accent ? 'text-[#E30613]' : 'text-zinc-900'
+                }`}
+              >
+                {card.value}
+              </div>
+              <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                {card.label}
+              </div>
+              {card.sub && (
+                <div className="text-[11px] text-zinc-400 mt-1">
+                  {card.sub}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden mb-6">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-100">
+          <h2 className="text-sm font-bold text-zinc-900">Recent activity</h2>
+          <button
+            onClick={() => navigate('activities', { state: { program } })}
+            className="text-xs font-bold text-[#E30613] hover:underline"
+          >
+            View all →
+          </button>
         </div>
 
-        {/* Program Description */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5">
-          <h5 className="font-semibold text-gray-800 mb-3">Program Description</h5>
-          <div
-            className="prose prose-blue max-w-none text-gray-600 leading-relaxed text-sm"
-            dangerouslySetInnerHTML={{ __html: program?.description || '' }}
-          />
-        </div>
+        {recentActivities.length === 0 ? (
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FaClipboardList className="text-zinc-400" size={16} />
+            </div>
+            <p className="text-sm text-zinc-500">No recent activity yet.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-zinc-100">
+            {recentActivities.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 px-4 sm:px-6 py-3 hover:bg-zinc-50 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E30613] mt-2 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-zinc-700 leading-snug break-words">
+                    {activity.description}
+                  </p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    {formatRelative(activity.createdAt)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-6">
+        <h2 className="text-sm font-bold text-zinc-900 mb-4">
+          Programme description
+        </h2>
+        <div
+          className="text-sm text-zinc-700 leading-relaxed break-words
+            [&_p]:mb-3 [&_a]:text-[#E30613] [&_a]:underline
+            [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5
+            [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5
+            [&_h1]:text-base [&_h1]:font-bold [&_h1]:text-zinc-900 [&_h1]:mb-2
+            [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-zinc-900 [&_h2]:mb-2
+            [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-zinc-900 [&_h3]:mb-1.5
+            [&_strong]:text-zinc-900 [&_strong]:font-bold
+            [&_img]:rounded-lg [&_img]:max-w-full [&_img]:my-3"
+          dangerouslySetInnerHTML={{
+            __html: program?.description || 'No description provided.',
+          }}
+        />
       </div>
     </div>
   );

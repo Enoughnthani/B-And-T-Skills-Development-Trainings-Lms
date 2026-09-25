@@ -1,4 +1,4 @@
-const BASE_URL = "https://b-and-t-lms-backend-main.onrender.com";
+const BASE_URL = "http://localhost:8080";
 
 const getStatusMessage = (status) => {
   switch (status) {
