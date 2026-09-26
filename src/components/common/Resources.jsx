@@ -88,7 +88,7 @@ export default function Resources() {
               <a
                 key={r.id}
                 href="#"
-                className="group flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors"
+                className="group no-underline flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors"
               >
                 <div className="w-12 h-12 bg-slate-50 group-hover:bg-[#E30613]/10 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-600 group-hover:text-[#E30613] shrink-0 transition-colors">
                   {r.type}

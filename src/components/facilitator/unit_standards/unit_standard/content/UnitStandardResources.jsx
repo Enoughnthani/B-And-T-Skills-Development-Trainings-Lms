@@ -1,16 +1,15 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
+import { FaFolder } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
-import { useUnitStandardContent } from './hooks/useUnitStandardContent';
-import ResourcesHeader from './ResourcesHeader';
+import DeleteResourceConfirm from './DeleteResourceConfirm';
+import RenameResourceModal from './modals/RenameResourceModal';
+import CreateFolderModal from './modals/CreateFolderModal';
+import PreviewModal from './modals/PreviewModal';
 import ResourcesBreadcrumb from './ResourcesBreadcrumb';
 import ResourcesGrid from './ResourcesGrid';
-import CreateFolderModal from './CreateFolderModal';
-import RenameResourceModal from './RenameResourceModal';
+import ResourcesHeader from './ResourcesHeader';
 import UploadProgress from './UploadProgress';
-import DeleteResourceConfirm from './DeleteResourceConfirm';
-import PreviewModal from './PreviewModal';
-import { FaFolder, FaTrash, FaTimes } from 'react-icons/fa';
-import { Button } from 'react-bootstrap';
+import { useUnitStandardContent } from './hooks/useUnitStandardContent';
 
 export default function UnitStandardResources() {
   const { unitStandardId } = useParams();
@@ -26,7 +25,7 @@ export default function UnitStandardResources() {
     createFolder,
     uploadFile,
     renameItem,
-    deleteItem
+    deleteItem,
   } = useUnitStandardContent(unitStandardId);
 
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -40,72 +39,67 @@ export default function UnitStandardResources() {
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleDragOver = (e) => {
+  function handleDragOver(e) {
     e.preventDefault();
     e.stopPropagation();
-  };
+  }
 
-  const handleDrop = (e) => {
+  function handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
     const files = Array.from(e.dataTransfer.files);
-    files.forEach(file => uploadFile(file));
-  };
+    files.forEach((file) => uploadFile(file));
+  }
 
-  const handleFileSelect = (e) => {
+  function handleFileSelect(e) {
     const files = Array.from(e.target.files);
-    files.forEach(file => uploadFile(file));
+    files.forEach((file) => uploadFile(file));
     e.target.value = '';
-  };
+  }
 
-  const handleDeleteClick = (item) => {
-    if (item) {
-      setSelectedItem(item);
-      setShowDeleteModal(true);
-    }
-  };
+  function handleDeleteClick(item) {
+    if (!item) return;
+    setSelectedItem(item);
+    setShowDeleteModal(true);
+  }
 
-  const handleConfirmDelete = (id) => {
-    if (id) {
-      deleteItem(id);
-      setShowDeleteModal(false);
-      setSelectedItem(null);
-    }
-  };
+  function handleConfirmDelete(id) {
+    if (!id) return;
+    deleteItem(id);
+    setShowDeleteModal(false);
+    setSelectedItem(null);
+  }
 
-  const handlePreview = (item) => {
+  function handlePreview(item) {
     setPreviewItem(item);
     setShowPreviewModal(true);
-  };
+  }
 
- 
-  const toggleSelectionMode = () => {
-    setSelectionMode(!selectionMode);
-    if (selectionMode) {
-      setSelectedItems(new Set()); // Clear selections when exiting mode
-    }
-  };
+  function toggleSelectionMode() {
+    setSelectionMode((prev) => {
+      if (prev) setSelectedItems(new Set());
+      return !prev;
+    });
+  }
 
-  const handleSelectItem = (id) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedItems(newSelected);
-  };
+  function handleSelectItem(id) {
+    setSelectedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
-  const handleSelectAll = () => {
-    if (selectedItems.size === contents.length) {
-      setSelectedItems(new Set());
-    } else {
-      const allIds = contents.map(item => item.id);
-      setSelectedItems(new Set(allIds));
-    }
-  };
+  function handleSelectAll() {
+    setSelectedItems((prev) =>
+      prev.size === contents.length
+        ? new Set()
+        : new Set(contents.map((item) => item.id))
+    );
+  }
 
-  const handleBulkDelete = async () => {
+  async function handleBulkDelete() {
     const idsToDelete = Array.from(selectedItems);
     for (const id of idsToDelete) {
       await deleteItem(id);
@@ -113,14 +107,14 @@ export default function UnitStandardResources() {
     setSelectedItems(new Set());
     setSelectionMode(false);
     setShowBulkDeleteConfirm(false);
-  };
+  }
 
   if (loading && contents.length === 0) {
     return (
-      <div className="w-full flex items-center justify-center h-screen bg-gray-50">
+      <div className="p-8 flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-          <p className="text-gray-500">Loading resources...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-zinc-200 border-t-[#E30613]" />
+          <p className="mt-3 text-sm text-zinc-500">Loading resources…</p>
         </div>
       </div>
     );
@@ -128,7 +122,7 @@ export default function UnitStandardResources() {
 
   return (
     <div
-      className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden"
+      className="p-4 sm:p-6 lg:p-8 w-full flex flex-col min-h-full"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -147,42 +141,27 @@ export default function UnitStandardResources() {
         ref={fileInputRef}
         type="file"
         multiple
-        style={{ display: 'none' }}
+        className="hidden"
         onChange={handleFileSelect}
       />
 
-      <ResourcesBreadcrumb
-        currentPath={currentPath}
-        onNavigate={navigateToPath}
-        onBack={goBack}
-        canGoBack={currentPath.length > 0}
-      />
-
-      {uploadProgress !== null && (
-        <UploadProgress progress={uploadProgress} />
+      {currentPath.length > 0 && (
+        <ResourcesBreadcrumb
+          currentPath={currentPath}
+          onNavigate={navigateToPath}
+          onBack={goBack}
+          canGoBack={currentPath.length > 0}
+        />
       )}
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      {uploadProgress !== null && <UploadProgress progress={uploadProgress} />}
+
+      <div className="flex-1">
         {contents.length === 0 ? (
-          <div className="text-center py-16 mt-20">
-            <FaFolder size={80} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">Empty folder</h3>
-            <p className="text-gray-400 text-sm mb-4">Upload files or create a folder</p>
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={() => setShowFolderModal(true)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-              >
-                New Folder
-              </button>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Upload Files
-              </button>
-            </div>
-          </div>
+          <EmptyFolder
+            onNewFolder={() => setShowFolderModal(true)}
+            onUpload={() => fileInputRef.current?.click()}
+          />
         ) : (
           <ResourcesGrid
             items={contents}
@@ -200,7 +179,6 @@ export default function UnitStandardResources() {
         )}
       </div>
 
-      {/* Modals */}
       <CreateFolderModal
         show={showFolderModal}
         onHide={() => setShowFolderModal(false)}
@@ -227,13 +205,40 @@ export default function UnitStandardResources() {
         item={previewItem}
       />
 
-      {/* Bulk Delete Confirmation Modal */}
       <DeleteResourceConfirm
         show={showBulkDeleteConfirm}
         onHide={() => setShowBulkDeleteConfirm(false)}
         item={{ name: `${selectedItems.size} items`, type: 'BULK' }}
         onConfirm={handleBulkDelete}
       />
+    </div>
+  );
+}
+
+function EmptyFolder({ onNewFolder, onUpload }) {
+  return (
+    <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center">
+      <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <FaFolder className="text-zinc-400 text-2xl" />
+      </div>
+      <h3 className="font-bold text-zinc-900 mb-1">This folder is empty</h3>
+      <p className="text-sm text-zinc-500 mb-5">
+        Create a folder or upload learning materials.
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        <button
+          onClick={onNewFolder}
+          className="inline-flex items-center justify-center gap-2 bg-white border border-zinc-300 hover:border-zinc-400 text-zinc-700 font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors"
+        >
+          New folder
+        </button>
+        <button
+          onClick={onUpload}
+          className="inline-flex items-center justify-center gap-2 bg-[#E30613] hover:bg-[#c00511] text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors"
+        >
+          Upload files
+        </button>
+      </div>
     </div>
   );
 }

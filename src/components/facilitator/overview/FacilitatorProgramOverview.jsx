@@ -1,5 +1,6 @@
 import { apiFetch } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
   FaBook,
@@ -75,7 +76,9 @@ export default function FacilitatorProgramOverview() {
   }
 
   function getProgramType() {
-    return program?.category === 'LEARNERSHIP' ? 'Learnership' : 'Short Course';
+    if (program?.category === 'LEARNERSHIP') return 'Learnership';
+    if (program?.category === 'INTERNSHIP') return 'Internship';
+    return 'Short Course';
   }
 
   function formatRelative(dateString) {
@@ -108,7 +111,7 @@ export default function FacilitatorProgramOverview() {
     );
   }
 
-  const stats_cards = [
+  const statsCards = [
     {
       label: 'Total learners',
       value: stats.totalLearners,
@@ -130,28 +133,62 @@ export default function FacilitatorProgramOverview() {
     },
   ];
 
+  const quickActions = [
+    {
+      label: 'Create unit standard',
+      description: 'Add a new SAQA unit standard to this programme.',
+      icon: FaBook,
+      onClick: () =>
+        navigate('unit-standards/new', { state: { program } }),
+    },
+    {
+      label: 'View learners',
+      description: 'See learners enrolled in this programme.',
+      icon: FaUsers,
+      onClick: () => navigate('learners', { state: { program } }),
+    },
+    {
+      label: 'View activities',
+      description: 'See everything happening in this programme.',
+      icon: FaClipboardList,
+      onClick: () => navigate('activities', { state: { program } }),
+    },
+  ];
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full">
 
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span className="text-xs font-bold text-[#E30613] tracking-[0.15em] uppercase">
-            {getGreeting()}, {user?.firstname || 'Facilitator'}
-          </span>
-          <span className="text-[10px] font-bold bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded uppercase tracking-wider">
-            {getProgramType()}
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-xs font-bold text-[#E30613] tracking-[0.15em] uppercase">
+              {getGreeting()}, {user?.firstname || 'Facilitator'}
+            </span>
+            <span className="text-[10px] font-bold bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded uppercase tracking-wider">
+              {getProgramType()}
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 mb-1 truncate">
+            {program?.name || 'Programme'}
+          </h1>
+          <p className="text-sm text-zinc-500">
+            Monitor content delivery and learner engagement.
+          </p>
         </div>
-        <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 mb-1 truncate">
-          {program?.name || 'Programme'}
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Monitor content delivery and learner engagement.
-        </p>
+
+        <button
+          onClick={() =>
+            navigate('unit-standards/new', { state: { program } })
+          }
+          className="inline-flex items-center justify-center gap-2 bg-[#E30613] hover:bg-[#c00511] text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors shrink-0 w-full sm:w-auto"
+        >
+          <Plus size={14} />
+          Create unit standard
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        {stats_cards.map((card, i) => {
+        {statsCards.map((card, i) => {
           const Icon = card.icon;
           return (
             <div
@@ -188,6 +225,32 @@ export default function FacilitatorProgramOverview() {
         })}
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        {quickActions.map((action, i) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={i}
+              onClick={action.onClick}
+              className="group text-left bg-white border border-zinc-200 rounded-xl p-4 hover:border-zinc-400 transition-colors"
+            >
+              <div className="w-9 h-9 bg-zinc-100 group-hover:bg-red-50 rounded-lg flex items-center justify-center mb-3 transition-colors">
+                <Icon
+                  className="text-zinc-600 group-hover:text-[#E30613] transition-colors"
+                  size={14}
+                />
+              </div>
+              <div className="font-bold text-sm text-zinc-900 mb-1 group-hover:text-[#E30613] transition-colors">
+                {action.label}
+              </div>
+              <div className="text-xs text-zinc-500 leading-snug">
+                {action.description}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden mb-6">
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-100">
           <h2 className="text-sm font-bold text-zinc-900">Recent activity</h2>
@@ -211,7 +274,7 @@ export default function FacilitatorProgramOverview() {
             {recentActivities.map((activity) => (
               <div
                 key={activity.id}
-                className="flex items-start gap-3 px-4 sm:px-6 py-3 hover:bg-zinc-50 transition-colors"
+                className="flex items-start gap-3 px-4 sm:px-6 py-3 hover:bg-red-50/30 transition-colors"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E30613] mt-2 shrink-0" />
                 <div className="flex-1 min-w-0">

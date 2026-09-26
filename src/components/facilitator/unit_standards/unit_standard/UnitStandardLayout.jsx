@@ -11,13 +11,14 @@ import { Outlet, useLocation, useParams } from 'react-router-dom';
 export default function UnitStandardLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const { programId } = useParams();
+  const { programId, unitStandardId } = useParams();
   const { unitStandard } = location.state || {};
 
   const userType = user?.role?.[0]?.toLowerCase() || 'facilitator';
   const basePath = `/user/${userType}/program-view/${programId}`;
-  const unitPath = unitStandard?.id
-    ? `${basePath}/unit-standards/${unitStandard.id}`
+
+  const unitPath = unitStandardId
+    ? `${basePath}/unit-standards/${unitStandardId}`
     : `${basePath}/unit-standards`;
 
   const navItems = [
@@ -48,10 +49,10 @@ export default function UnitStandardLayout() {
   const unitStandardBadge = unitStandard ? (
     <div className="px-3 py-2 bg-zinc-900 rounded-lg">
       <div className="text-[10px] font-bold text-[#E30613] tracking-[0.2em] uppercase">
-        Unit standard
+        Module
       </div>
       <div className="text-xs text-zinc-300 truncate">
-        {unitStandard.title || unitStandard.name}
+        {unitStandard.title}
       </div>
     </div>
   ) : null;

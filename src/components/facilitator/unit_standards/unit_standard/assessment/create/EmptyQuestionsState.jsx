@@ -2,10 +2,14 @@ import { FaPlusCircle } from 'react-icons/fa';
 
 export default function EmptyQuestionsState() {
   return (
-    <div className="bg-white rounded-lg border-2 border-dashed border-gray-200 p-12 text-center">
-      <FaPlusCircle className="text-gray-300 text-5xl mx-auto mb-3" />
-      <p className="text-gray-500">No questions added yet</p>
-      <p className="text-sm text-gray-400 mt-1">Click on any question type above to start building your assessment</p>
+    <div className="bg-white border border-dashed border-zinc-300 rounded-xl p-12 text-center">
+      <div className="w-14 h-14 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <FaPlusCircle className="text-zinc-400" size={20} />
+      </div>
+      <h3 className="font-bold text-zinc-900 mb-1">No questions yet</h3>
+      <p className="text-sm text-zinc-500 max-w-sm mx-auto">
+        Click on any question type above to start building your assessment.
+      </p>
     </div>
   );
 }

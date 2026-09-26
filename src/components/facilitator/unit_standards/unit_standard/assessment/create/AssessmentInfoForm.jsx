@@ -1,112 +1,185 @@
-import { Card } from 'react-bootstrap';
 import { FaFileAlt, FaTimes } from 'react-icons/fa';
 
-export default function AssessmentInfoForm({ assessmentInfo, setAssessmentInfo, existingFile, setExistingFile, selectedFile, setSelectedFile }) {
+const TYPE_OPTIONS = [
+  { value: 'LEARNER_WORKBOOK', label: 'Learner workbook' },
+  { value: 'SUMMATIVE', label: 'Summative' },
+  { value: 'TEST', label: 'Quiz' },
+];
+
+export default function AssessmentInfoForm({
+  assessmentInfo,
+  setAssessmentInfo,
+  existingFile,
+  setExistingFile,
+  selectedFile,
+  setSelectedFile,
+}) {
+  function update(field, value) {
+    setAssessmentInfo((prev) => ({ ...prev, [field]: value }));
+  }
+
+  const showFileUpload = assessmentInfo?.type !== 'TEST';
 
   return (
-    <Card className="border-0 shadow-sm mb-6">
-      <Card.Body className="p-5">
-        <h3 className="font-semibold text-gray-800 mb-4">Assessment Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Assessment Type *</label>
+    <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden mb-5">
+
+      <div className="px-4 sm:px-6 py-4 border-b border-zinc-100">
+        <h2 className="text-sm font-bold text-zinc-900">Assessment details</h2>
+      </div>
+
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <Field label="Assessment type" required>
             <select
               value={assessmentInfo.type}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, type: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
+              onChange={(e) => update('type', e.target.value)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none cursor-pointer"
             >
-              <option value="LEARNER_WORKBOOK">📘 Learner Workbook</option>
-              <option value="SUMMATIVE">📋 Summative</option>
-              <option value="TEST">📝 Quiz</option>
+              {TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          </Field>
+
+          <Field label="Title" required>
             <input
               type="text"
               value={assessmentInfo.title}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, title: e.target.value })}
+              onChange={(e) => update('title', e.target.value)}
               placeholder="Enter assessment title"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+          </Field>
+
+          <Field label="Start date">
             <input
               type="datetime-local"
               value={assessmentInfo.startDate}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, startDate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              onChange={(e) => update('startDate', e.target.value)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+          </Field>
+
+          <Field label="Due date">
             <input
               type="datetime-local"
               value={assessmentInfo.dueDate}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, dueDate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              onChange={(e) => update('dueDate', e.target.value)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors"
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+          <Field label="Duration" hint="In minutes">
             <input
               type="number"
               value={assessmentInfo.duration}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, duration: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              onChange={(e) => update('duration', parseInt(e.target.value, 10) || 0)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Total Marks</label>
+          </Field>
+
+          <Field label="Total marks">
             <input
               type="number"
               value={assessmentInfo.totalMarks}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, totalMarks: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              onChange={(e) => update('totalMarks', parseInt(e.target.value, 10) || 0)}
+              className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors"
             />
-          </div>
+          </Field>
+
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              value={assessmentInfo.description}
-              onChange={(e) => setAssessmentInfo({ ...assessmentInfo, description: e.target.value })}
-              rows={2}
-              placeholder="Instructions for learners..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-            />
+            <Field label="Description" hint="Instructions shown to learners.">
+              <textarea
+                value={assessmentInfo.description}
+                onChange={(e) => update('description', e.target.value)}
+                rows={3}
+                placeholder="Instructions for learners…"
+                className="w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors resize-none"
+              />
+            </Field>
           </div>
+
         </div>
 
-        {assessmentInfo?.type !== "TEST" &&
-          < div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Assessment File (Optional)</label>
+        {showFileUpload && (
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              Assessment file{' '}
+              <span className="text-zinc-400 font-normal">(optional)</span>
+            </label>
+
             {existingFile && !selectedFile && (
-              <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FaFileAlt className="text-gray-500 text-xl" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">{existingFile.name}</p>
-                    <p className="text-xs text-gray-400">Already uploaded</p>
+              <div className="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200 rounded-lg mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 bg-white border border-zinc-200 rounded-lg flex items-center justify-center shrink-0">
+                    <FaFileAlt className="text-zinc-500" size={14} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-zinc-900 truncate">
+                      {existingFile.name}
+                    </p>
+                    <p className="text-[11px] text-zinc-500">
+                      Already uploaded
+                    </p>
                   </div>
                 </div>
-                <button type="button" onClick={() => setExistingFile(null)} className="text-gray-400 hover:text-red-500 transition">
-                  <FaTimes size={16} />
+                <button
+                  type="button"
+                  onClick={() => setExistingFile(null)}
+                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-[#E30613] hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                  aria-label="Remove file"
+                >
+                  <FaTimes size={12} />
                 </button>
               </div>
             )}
-            <div className={`border-2 border-dashed rounded-lg p-4 text-center hover:border-blue-400 transition-colors ${!existingFile || selectedFile ? 'border-gray-200' : 'border-green-200'}`}>
-              <input type="file" accept=".pdf,.docx,.doc,.txt" onChange={(e) => setSelectedFile(e.target.files[0])} className="hidden" id="assessment-file" />
-              <label htmlFor="assessment-file" className="cursor-pointer block">
-                <FaFileAlt className="mx-auto text-3xl mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600">{selectedFile ? selectedFile.name : (existingFile ? 'Replace with new file' : 'Click to upload assessment file')}</p>
-                <p className="text-xs text-gray-400 mt-1">PDF, DOCX, or TXT up to 10MB</p>
+
+            <div className="border-2 border-dashed border-zinc-200 rounded-xl p-6 text-center hover:border-zinc-400 transition-colors bg-zinc-50/40">
+              <input
+                type="file"
+                accept=".pdf,.docx,.doc,.txt"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                className="hidden"
+                id="assessment-file"
+              />
+              <label
+                htmlFor="assessment-file"
+                className="cursor-pointer flex flex-col items-center gap-2"
+              >
+                <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center">
+                  <FaFileAlt className="text-zinc-400" size={18} />
+                </div>
+                <span className="text-sm font-medium text-zinc-700">
+                  {selectedFile
+                    ? selectedFile.name
+                    : existingFile
+                    ? 'Replace with new file'
+                    : 'Click to upload assessment file'}
+                </span>
+                <span className="text-[11px] text-zinc-400">
+                  PDF, DOCX or TXT · up to 10MB
+                </span>
               </label>
             </div>
           </div>
-        }
-      </Card.Body>
-    </Card >
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, required, hint, children }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+        {label}
+        {required && <span className="text-[#E30613] ml-0.5">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-[11px] text-zinc-400 mt-1">{hint}</p>}
+    </div>
   );
 }

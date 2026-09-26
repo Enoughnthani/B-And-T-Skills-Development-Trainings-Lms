@@ -61,7 +61,7 @@ export default function Contact() {
           <div className="lg:col-span-2 space-y-4">
             <a
               href="tel:0120041175"
-              className="group flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-[#E30613] transition-colors"
+              className="group no-underline flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-[#E30613] transition-colors"
             >
               <div className="w-10 h-10 bg-slate-50 group-hover:bg-[#E30613]/10 rounded-lg flex items-center justify-center shrink-0 transition-colors">
                 <Phone size={18} className="text-[#E30613]" />
@@ -80,7 +80,7 @@ export default function Contact() {
               href="https://wa.me/27785134511"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-green-600 transition-colors"
+              className="group no-underline flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-green-600 transition-colors"
             >
               <div className="w-10 h-10 bg-slate-50 group-hover:bg-green-50 rounded-lg flex items-center justify-center shrink-0 transition-colors">
                 <MessageCircle size={18} className="text-green-600" />
@@ -97,7 +97,7 @@ export default function Contact() {
 
             <a
               href="mailto:info@btsdtrainings.co.za"
-              className="group flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-[#E30613] transition-colors"
+              className="group  no-underline flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-5 hover:border-[#E30613] transition-colors"
             >
               <div className="w-10 h-10 bg-slate-50 group-hover:bg-[#E30613]/10 rounded-lg flex items-center justify-center shrink-0 transition-colors">
                 <Mail size={18} className="text-[#E30613]" />

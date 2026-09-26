@@ -93,6 +93,7 @@ import LearnerDetail from "./components/program_manager/learners/LearnerDetail";
 import AssessmentsList from "./components/program_manager/assessments/AssessmentsList";
 import AssessmentForm from "./components/program_manager/assessments/AssessmentForm";
 import AssessmentDetail from "./components/program_manager/assessments/AssessmentDetail";
+import ProgramActivities from "./components/facilitator/activities/ProgramActivities";
 
 export default function App() {
   return (
@@ -211,15 +212,20 @@ export default function App() {
         {/* FACILITATOR ROUTES */}
         <Route element={<ProtectedRoute role="FACILITATOR" />}>
           <Route path={ROUTES.FACILITATOR} element={<Layout />}>
+
             <Route index element={<StaffDashboard />} />
             <Route path="profile" element={<ProfilePage />} />
+
             <Route path="program-view/:programId" element={<FacilitatorProgramView />}>
               <Route index element={<FacilitatorProgramOverview />} />
               <Route path="unit-standards" element={<UnitStandardsPage />} />
               <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
               <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
               <Route path="learners" element={<EnrolledLearnerView />} />
+              <Route path="activities" element={<ProgramActivities />} />
             </Route>
+
+
             <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />}>
               <Route index element={<UnitStandardOverview />} />
               <Route path="content" element={<UnitStandardResources />} />
@@ -228,6 +234,7 @@ export default function App() {
               <Route path="assessments/new" element={<AssessmentFormPage />} />
               <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
             </Route>
+
           </Route>
         </Route>
 

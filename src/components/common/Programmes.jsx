@@ -158,7 +158,7 @@ export default function Programmes() {
               <Link
                 key={p.id}
                 to={`/programmes/${p.id}`}
-                className="group flex flex-col bg-white border border-slate-200 rounded-xl p-6 hover:border-[#E30613] hover:shadow-sm transition-all"
+                className="group no-underline flex flex-col bg-white border border-slate-200 rounded-xl p-6 hover:border-[#E30613] hover:shadow-sm transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-11 h-11 bg-slate-50 group-hover:bg-[#E30613]/10 rounded-lg flex items-center justify-center transition-colors">

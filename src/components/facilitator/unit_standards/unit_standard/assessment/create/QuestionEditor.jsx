@@ -1,148 +1,214 @@
-import { FaPlus } from 'react-icons/fa';
-import { Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { FaPlus, FaTrash } from 'react-icons/fa';
+
+const inputClass =
+  'w-full px-3.5 py-2.5 text-sm bg-white border border-zinc-300 rounded-lg focus:border-[#E30613] outline-none transition-colors';
+
+const smallLabel = 'text-xs font-bold text-zinc-500 uppercase tracking-wider';
 
 export default function QuestionEditor({ question, onUpdate }) {
-  const updateOption = (optionIndex, value) => {
+  function updateOption(optionIndex, value) {
     const newOptions = [...question.options];
     newOptions[optionIndex] = value;
     onUpdate(question.id, 'options', newOptions);
-  };
+  }
 
-  const addOption = () => {
+  function addOption() {
     onUpdate(question.id, 'options', [...question.options, '']);
-  };
+  }
 
-  const removeOption = (optionIndex) => {
-    const newOptions = question.options.filter((_, idx) => idx !== optionIndex);
-    onUpdate(question.id, 'options', newOptions);
-  };
+  function removeOption(optionIndex) {
+    onUpdate(
+      question.id,
+      'options',
+      question.options.filter((_, idx) => idx !== optionIndex)
+    );
+  }
 
-  const updatePair = (pairIndex, side, value) => {
+  function updatePair(pairIndex, side, value) {
     const newPairs = [...question.pairs];
     newPairs[pairIndex] = { ...newPairs[pairIndex], [side]: value };
     onUpdate(question.id, 'pairs', newPairs);
-  };
+  }
 
-  const addPair = () => {
+  function addPair() {
     onUpdate(question.id, 'pairs', [...question.pairs, { left: '', right: '' }]);
-  };
+  }
 
-  const removePair = (pairIndex) => {
-    const newPairs = question.pairs.filter((_, idx) => idx !== pairIndex);
-    onUpdate(question.id, 'pairs', newPairs);
-  };
+  function removePair(pairIndex) {
+    onUpdate(
+      question.id,
+      'pairs',
+      question.pairs.filter((_, idx) => idx !== pairIndex)
+    );
+  }
 
   switch (question.type) {
     case 'MULTIPLE_CHOICE':
       return (
-        <div className="space-y-3">
-          {question.options.map((option, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input
-                type="radio"
-                name={`correct-${question.id}`}
-                checked={question.correctAnswer === option}
-                onChange={() => onUpdate(question.id, 'correctAnswer', option)}
-                className="w-4 h-4"
-              />
-              <input
-                type="text"
-                value={option}
-                onChange={(e) => updateOption(idx, e.target.value)}
-                placeholder={`Option ${String.fromCharCode(65 + idx)}`}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-              />
-              {question.options.length > 2 && (
-                <button onClick={() => removeOption(idx)} className="p-1 bg-transparent text-red-500">
-                  <Trash2 size={15} />
-                </button>
-              )}
-            </div>
-          ))}
-          <button onClick={addOption} className="text-sm bg-transparent text-blue-700 flex items-center gap-1 mt-2">
-            <FaPlus size={12} /> Add Option
+        <div className="space-y-2">
+          {question.options.map((option, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const isCorrect = question.correctAnswer === option;
+
+            return (
+              <div key={idx} className="flex items-center gap-2">
+                <label
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer transition-colors shrink-0 text-xs font-bold ${
+                    isCorrect
+                      ? 'bg-[#E30613] text-white'
+                      : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`correct-${question.id}`}
+                    checked={isCorrect}
+                    onChange={() =>
+                      onUpdate(question.id, 'correctAnswer', option)
+                    }
+                    className="hidden"
+                  />
+                  {letter}
+                </label>
+
+                <input
+                  type="text"
+                  value={option}
+                  onChange={(e) => updateOption(idx, e.target.value)}
+                  placeholder={`Option ${letter}`}
+                  className={`flex-1 px-3.5 py-2.5 text-sm bg-white border rounded-lg focus:border-[#E30613] outline-none transition-colors ${
+                    isCorrect ? 'border-[#E30613]' : 'border-zinc-300'
+                  }`}
+                />
+
+                {question.options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeOption(idx)}
+                    className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-[#E30613] hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                    aria-label="Remove option"
+                  >
+                    <FaTrash size={11} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={addOption}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E30613] hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors mt-1"
+          >
+            <FaPlus size={10} />
+            Add option
           </button>
         </div>
       );
 
     case 'TRUE_OR_FALSE':
       return (
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name={`tf-${question.id}`}
-              checked={question.correctAnswer === 'true'}
-              onChange={() => onUpdate(question.id, 'correctAnswer', 'true')}
-            />
-            <span>True</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name={`tf-${question.id}`}
-              checked={question.correctAnswer === 'false'}
-              onChange={() => onUpdate(question.id, 'correctAnswer', 'false')}
-            />
-            <span>False</span>
-          </label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: 'true', label: 'True' },
+            { value: 'false', label: 'False' },
+          ].map((opt) => {
+            const isCorrect = question.correctAnswer === opt.value;
+            return (
+              <label
+                key={opt.value}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg cursor-pointer transition-colors border ${
+                  isCorrect
+                    ? 'bg-[#E30613] text-white border-[#E30613]'
+                    : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-400'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={`tf-${question.id}`}
+                  checked={isCorrect}
+                  onChange={() =>
+                    onUpdate(question.id, 'correctAnswer', opt.value)
+                  }
+                  className="hidden"
+                />
+                {opt.label}
+              </label>
+            );
+          })}
         </div>
       );
 
-    case 'FILL_IN_BLANKS':
+    case 'FILL_IN_BLANKS': {
+      const blankCount = (question.text?.match(/___/g) || []).length;
+
       return (
         <div className="space-y-4">
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Question Text (use ___ for blanks)
-            </label>
+          <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+            <p className="text-xs text-zinc-600">
+              Use three underscores{' '}
+              <code className="bg-white px-1.5 py-0.5 rounded border border-zinc-200 font-mono text-[11px]">
+                ___
+              </code>{' '}
+              in the question text to create blanks. Each blank gets its own
+              answer below.
+            </p>
           </div>
 
-          <div>
-            {(() => {
-              const blankCount = (question.text?.match(/___/g) || []).length;
-              
-              if (blankCount > 0) {
-                return (<div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Correct Answers
-                  </label>
-
-                  {Array(blankCount).fill(0).map((_, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="w-24 text-sm font-medium text-gray-600">
-                        Blank {idx + 1}:
-                      </div>
-                      <input
-                        type="text"
-                        value={question.blanks?.[idx] || ''}
-                        onChange={(e) => {
-                          const newAnswers = [...(question.blanks || [])];
-                          newAnswers[idx] = e.target.value;
-                          onUpdate(question.id, 'blanks', newAnswers);
-                        }}
-                        placeholder={`Correct answer for blank ${idx + 1}`}
-                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                      />
-                    </div>
-                  ))}
-                </div>)
-              }
-            })()}
-          </div>
+          {blankCount > 0 ? (
+            <div>
+              <p className={`${smallLabel} mb-2`}>
+                Correct answers ({blankCount})
+              </p>
+              <div className="space-y-2">
+                {Array.from({ length: blankCount }).map((_, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-zinc-500 w-16 shrink-0">
+                      Blank {idx + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={question.blanks?.[idx] || ''}
+                      onChange={(e) => {
+                        const newBlanks = [...(question.blanks || [])];
+                        newBlanks[idx] = e.target.value;
+                        onUpdate(question.id, 'blanks', newBlanks);
+                      }}
+                      placeholder={`Answer for blank ${idx + 1}`}
+                      className={`${inputClass} flex-1`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 bg-zinc-50 border border-dashed border-zinc-300 rounded-lg">
+              <p className="text-sm text-zinc-500">
+                Add{' '}
+                <code className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-zinc-200">
+                  ___
+                </code>{' '}
+                in the question text above to create blanks.
+              </p>
+            </div>
+          )}
         </div>
       );
+    }
 
     case 'LONG_QUESTION':
       return (
         <div>
+          <label className={`block ${smallLabel} mb-2`}>
+            Sample answer or grading rubric
+          </label>
           <textarea
             value={question.sampleAnswer}
-            onChange={(e) => onUpdate(question.id, 'sampleAnswer', e.target.value)}
-            placeholder="Provide a sample answer or rubric for grading..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm min-h-[120px]"
+            onChange={(e) =>
+              onUpdate(question.id, 'sampleAnswer', e.target.value)
+            }
+            placeholder="Provide a sample answer or rubric for grading…"
+            className={`${inputClass} min-h-[120px] resize-none`}
           />
         </div>
       );
@@ -150,37 +216,51 @@ export default function QuestionEditor({ question, onUpdate }) {
     case 'MATCHING':
       return (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-4 mb-2">
-            <span className="text-sm font-medium text-gray-600">Left Column</span>
-            <span className="text-sm font-medium text-gray-600">Right Column</span>
+          <div className="grid grid-cols-2 gap-3 mb-2">
+            <span className={smallLabel}>Left column</span>
+            <span className={smallLabel}>Right column</span>
           </div>
+
           {question.pairs.map((pair, idx) => (
-            <div key={idx} className="grid grid-cols-2 gap-4">
+            <div key={idx} className="grid grid-cols-2 gap-3 items-center">
               <input
                 type="text"
                 value={pair.left}
                 onChange={(e) => updatePair(idx, 'left', e.target.value)}
                 placeholder={`Item ${idx + 1}`}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                className={inputClass}
               />
+
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={pair.right}
                   onChange={(e) => updatePair(idx, 'right', e.target.value)}
                   placeholder={`Match ${idx + 1}`}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                  className={`${inputClass} flex-1`}
                 />
+
                 {question.pairs.length > 2 && (
-                  <button onClick={() => removePair(idx)} className="p-1 bg-transparent text-red-500">
-                    <Trash2 size={15} />
+                  <button
+                    type="button"
+                    onClick={() => removePair(idx)}
+                    className="w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-[#E30613] hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                    aria-label="Remove pair"
+                  >
+                    <FaTrash size={11} />
                   </button>
                 )}
               </div>
             </div>
           ))}
-          <button onClick={addPair} className="text-sm bg-transparent text-blue-700 flex items-center gap-1 mt-2">
-            <FaPlus size={12} /> Add Pair
+
+          <button
+            type="button"
+            onClick={addPair}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E30613] hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors mt-2"
+          >
+            <FaPlus size={10} />
+            Add pair
           </button>
         </div>
       );

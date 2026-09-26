@@ -72,7 +72,7 @@ export default function Announcements() {
               <Link
                 key={item.id}
                 to={`/announcements/${item.id}`}
-                className={`group flex items-start gap-5 px-6 py-5 hover:bg-slate-50 transition-colors ${
+                className={`group no-underline flex items-start gap-5 px-6 py-5 hover:bg-slate-50 transition-colors ${
                   i !== filtered.length - 1 ? 'border-b border-slate-100' : ''
                 }`}
               >

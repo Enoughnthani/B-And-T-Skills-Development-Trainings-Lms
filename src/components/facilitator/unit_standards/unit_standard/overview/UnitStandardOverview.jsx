@@ -1,173 +1,353 @@
 import { apiFetch } from '@/api/api';
 import { useEffect, useState } from 'react';
-import { Badge, Button } from 'react-bootstrap';
 import {
-    FaBook,
-    FaCalendarAlt,
-    FaClipboardList,
-    FaEdit,
-    FaFileAlt,
-    FaGraduationCap,
-    FaLink,
-    FaStar,
-    FaTrash,
-    FaVideo
+  FaBook,
+  FaBriefcase,
+  FaClipboardList,
+  FaClock,
+  FaFileAlt,
+  FaGraduationCap,
+  FaLink,
+  FaStar,
+  FaTools,
+  FaVideo,
 } from 'react-icons/fa';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+
+const TYPE_LABELS = {
+  KNOWLEDGE: 'Knowledge',
+  PRACTICAL: 'Practical',
+  WORK_EXPERIENCE: 'Work experience',
+};
+
+const TYPE_STYLES = {
+  KNOWLEDGE: 'bg-zinc-900 text-white',
+  PRACTICAL: 'bg-[#E30613] text-white',
+  WORK_EXPERIENCE: 'bg-zinc-100 text-zinc-600',
+};
+
+const TYPE_ICONS = {
+  KNOWLEDGE: FaBook,
+  PRACTICAL: FaTools,
+  WORK_EXPERIENCE: FaBriefcase,
+};
+
+const STATUS_LABELS = {
+  ACTIVE: 'Active',
+  PHASED_OUT: 'Phased out',
+  PENDING: 'Pending',
+};
+
+const STATUS_STYLES = {
+  ACTIVE: 'bg-zinc-100 text-zinc-700',
+  PHASED_OUT: 'bg-red-50 text-[#E30613]',
+  PENDING: 'bg-zinc-100 text-zinc-500',
+};
 
 export default function UnitStandardOverview() {
-    const { programId, unitStandardId } = useParams();
-    const navigate = useNavigate();
-    const location = useLocation()
-    const [unitStandard, setUnitStandard] = useState(location?.state?.unitStandard || {});
-    const [loading, setLoading] = useState(true);
+  const { unitStandardId } = useParams();
+  const location = useLocation();
+  const [unitStandard, setUnitStandard] = useState(
+    location?.state?.unitStandard || null
+  );
+  const [loading, setLoading] = useState(!location?.state?.unitStandard);
 
-    useEffect(() => {
-        setLoading(false)
+  useEffect(() => {
+    if (unitStandard || !unitStandardId) return;
 
-        const getStats = async () => {
-            const data = await apiFetch(`/api/unit-standards/${unitStandard?.unitStandardId}`)
-            setUnitStandard(data)
-        }
-
-        getStats()
-
-    }, [location])
-
-    const getTypeBadge = (type) => {
-        const styles = {
-            FUNDAMENTAL: { bg: '!bg-blue-50', text: 'text-blue-700' },
-            CORE: { bg: '!bg-green-50', text: 'text-green-700' },
-            ELECTIVE: { bg: '!bg-purple-50', text: 'text-purple-700' }
-        };
-        const style = styles[type] || styles.CORE;
-        return <Badge className={`${style.bg} ${style.text} px-2 py-1 text-xs`}>{type}</Badge>;
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-                <div className="text-center">
-                    <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mx-auto mb-3"></div>
-                    <p className="text-gray-500 text-sm">Loading...</p>
-                </div>
-            </div>
-        );
+    async function load() {
+      setLoading(true);
+      try {
+        const result = await apiFetch(`/api/unit-standards/${unitStandardId}`);
+        if (result?.payload) setUnitStandard(result.payload);
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
     }
 
+    load();
+  }, [unitStandardId]);
+
+  if (loading) {
     return (
-        <div className="w-full bg-gray-50 overflow-y-auto h-screen">
-            <div className="px-6 py-6">
-
-                {/* Header Card */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-                    <div className="flex justify-between items-start flex-wrap gap-4">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="font-mono text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded">
-                                    ID: {unitStandard.unitStandardId}
-                                </span>
-                                {getTypeBadge(unitStandard.type)}
-                                <span className="text-xs text-gray-400">
-                                    Program: {unitStandard.programName}
-                                </span>
-                            </div>
-                            <h1 className="text-xl font-bold text-gray-800 mb-2">{unitStandard.title}</h1>
-                            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                                <span className="flex items-center gap-1">
-                                    <FaStar className="text-amber-400" size={14} />
-                                    {unitStandard.credits} credits
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <FaGraduationCap size={14} />
-                                    {unitStandard.nqfLevel}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <FaCalendarAlt size={14} />
-                                    Updated: {new Date(unitStandard.updatedAt).toLocaleDateString()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Stats Cards - Only stats, no actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Content Stats */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                                <FaBook className="text-blue-500 text-lg" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-400 uppercase">Total Contents</p>
-                                <p className="text-2xl font-bold text-gray-800">{unitStandard.contentCount || 0}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
-                            <span className="flex items-center gap-1">
-                                <FaFileAlt size={10} /> Files
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <FaVideo size={10} /> Videos
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <FaLink size={10} /> Links
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Assessment Stats */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                                <FaClipboardList className="text-purple-500 text-lg" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-400 uppercase">Total Assessments</p>
-                                <p className="text-2xl font-bold text-gray-800">{unitStandard.assessmentCount || 0}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
-                            <span className="flex items-center gap-1">
-                                <FaClipboardList size={10} /> Quizzes
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <FaClipboardList size={10} /> Assignments
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <FaClipboardList size={10} /> Exams
-                            </span>
-                        </div>
-                    </div>
-
-                    
-                    <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-5 shadow-md">
-                        <div className="flex items-center justify-between mb-3">
-                            <div>
-                                <p className="text-xs text-gray-300 uppercase">Total Learning Hours</p>
-                                <p className="text-2xl font-bold text-white">
-                                    {unitStandard.credits * 10 || 0}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                                <FaCalendarAlt className="text-white text-lg" />
-                            </div>
-                        </div>
-                        <div className="text-xs text-gray-300 pt-2 border-t border-gray-600">
-                            Based on {unitStandard.credits} credits (10 hours per credit)
-                        </div>
-                    </div>
-                </div>
-
-                <div className='shadow-sm bg-white rounded p-2 my-4'>
-                    <h4>Description</h4>
-
-                    {unitStandard.description && (
-                        <p className="text-gray-600 text-sm mt-4 leading-relaxed">{unitStandard.description}</p>
-                    )}
-                </div>
-            </div>
+      <div className="p-8 flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-zinc-200 border-t-[#E30613]" />
+          <p className="mt-3 text-sm text-zinc-500">Loading module…</p>
         </div>
+      </div>
     );
+  }
+
+  if (!unitStandard) {
+    return (
+      <div className="p-8 text-center text-sm text-zinc-500">
+        Module not found.
+      </div>
+    );
+  }
+
+  const TypeIcon = TYPE_ICONS[unitStandard.type?.toUpperCase()] || FaBook;
+  const notionalHours =
+    unitStandard.notionalHours || (unitStandard.credits || 0) * 10;
+
+  const hasDescription =
+    unitStandard.description ||
+    unitStandard.purpose ||
+    unitStandard.learningAssumed ||
+    unitStandard.rangeStatement;
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 w-full">
+
+      <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-6 mb-5">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="font-mono text-xs font-bold text-zinc-700 bg-zinc-100 px-2 py-1 rounded">
+            {unitStandard.unitStandardId}
+          </span>
+          {renderTypeBadge(unitStandard.type)}
+          {renderStatusBadge(unitStandard.status)}
+          {unitStandard.programName && (
+            <span className="text-xs text-zinc-500">
+              {unitStandard.programName}
+            </span>
+          )}
+        </div>
+
+        <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 mb-3 break-words">
+          {unitStandard.title}
+        </h1>
+
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-500">
+          {unitStandard.credits != null && (
+            <span className="flex items-center gap-1.5">
+              <FaStar size={12} className="text-[#E30613]" />
+              {unitStandard.credits} credits
+            </span>
+          )}
+          {unitStandard.nqfLevel && (
+            <span className="flex items-center gap-1.5">
+              <FaGraduationCap size={12} />
+              {unitStandard.nqfLevel}
+            </span>
+          )}
+          {unitStandard.updatedAt && (
+            <span className="flex items-center gap-1.5">
+              <FaClock size={12} />
+              Updated{' '}
+              {new Date(unitStandard.updatedAt).toLocaleDateString('en-ZA', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </span>
+          )}
+          {unitStandard.moderationBody && (
+            <span className="flex items-center gap-1.5">
+              Moderated by {unitStandard.moderationBody}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center">
+              <FaBook className="text-zinc-600" size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-zinc-900 tabular-nums mb-0.5">
+            {unitStandard.contentCount || 0}
+          </div>
+          <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+            Learning content
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-100">
+            <span className="flex items-center gap-1">
+              <FaFileAlt size={10} /> Files
+            </span>
+            <span className="flex items-center gap-1">
+              <FaVideo size={10} /> Videos
+            </span>
+            <span className="flex items-center gap-1">
+              <FaLink size={10} /> Links
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center">
+              <FaClipboardList className="text-zinc-600" size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-zinc-900 tabular-nums mb-0.5">
+            {unitStandard.assessmentCount || 0}
+          </div>
+          <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+            Assessments
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 mt-3 pt-3 border-t border-zinc-100">
+            <span>Formative</span>
+            <span>Summative</span>
+            <span>PoE</span>
+          </div>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-900 rounded-xl p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+              <FaClock className="text-white" size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-white tabular-nums mb-0.5">
+            {notionalHours}
+          </div>
+          <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+            Notional hours
+          </div>
+          <div className="text-xs text-zinc-400 mt-3 pt-3 border-t border-zinc-800">
+            {unitStandard.notionalHours
+              ? 'Recorded from QCTO curriculum'
+              : `Estimated from ${unitStandard.credits || 0} credits`}
+          </div>
+        </div>
+      </div>
+
+      {hasDescription && (
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-6 space-y-5">
+
+          {unitStandard.purpose && (
+            <Section title="Purpose">
+              <p className="text-sm text-zinc-700 leading-relaxed break-words whitespace-pre-line">
+                {unitStandard.purpose}
+              </p>
+            </Section>
+          )}
+
+          {unitStandard.description && (
+            <Section title="Description">
+              <p className="text-sm text-zinc-700 leading-relaxed break-words whitespace-pre-line">
+                {unitStandard.description}
+              </p>
+            </Section>
+          )}
+
+          {unitStandard.learningAssumed && (
+            <Section title="Learning assumed to be in place">
+              <p className="text-sm text-zinc-700 leading-relaxed break-words whitespace-pre-line">
+                {unitStandard.learningAssumed}
+              </p>
+            </Section>
+          )}
+
+          {unitStandard.rangeStatement && (
+            <Section title="Range statement">
+              <p className="text-sm text-zinc-700 leading-relaxed break-words whitespace-pre-line">
+                {unitStandard.rangeStatement}
+              </p>
+            </Section>
+          )}
+        </div>
+      )}
+
+      {(unitStandard.specificOutcomes?.length > 0 ||
+        unitStandard.assessmentCriteria?.length > 0 ||
+        unitStandard.criticalCrossFieldOutcomes?.length > 0) && (
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-6 mt-5 space-y-5">
+
+          {unitStandard.specificOutcomes?.length > 0 && (
+            <Section title="Specific outcomes">
+              <ul className="space-y-2">
+                {unitStandard.specificOutcomes.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-700"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E30613] mt-2 shrink-0" />
+                    <span className="break-words">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {unitStandard.assessmentCriteria?.length > 0 && (
+            <Section title="Assessment criteria">
+              <ul className="space-y-2">
+                {unitStandard.assessmentCriteria.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-700"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E30613] mt-2 shrink-0" />
+                    <span className="break-words">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {unitStandard.criticalCrossFieldOutcomes?.length > 0 && (
+            <Section title="Critical cross-field outcomes">
+              <ul className="space-y-2">
+                {unitStandard.criticalCrossFieldOutcomes.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-700"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-2 shrink-0" />
+                    <span className="break-words">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <div>
+      <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function renderTypeBadge(type) {
+  if (!type) return null;
+  const key = type.toUpperCase();
+  return (
+    <span
+      className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
+        TYPE_STYLES[key] || 'bg-zinc-100 text-zinc-600'
+      }`}
+    >
+      {TYPE_LABELS[key] || type}
+    </span>
+  );
+}
+
+function renderStatusBadge(status) {
+  if (!status) return null;
+  const key = status.toUpperCase();
+  return (
+    <span
+      className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
+        STATUS_STYLES[key] || 'bg-zinc-100 text-zinc-600'
+      }`}
+    >
+      {STATUS_LABELS[key] || status}
+    </span>
+  );
 }

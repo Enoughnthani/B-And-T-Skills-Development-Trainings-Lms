@@ -2,6 +2,7 @@ import { apiFetch } from '@/api/api';
 import DashboardSidebar from '@/components/common/DashboardSidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import {
+  Activity,
   Book,
   ChartArea,
   Home,
@@ -34,11 +35,11 @@ export default function FacilitatorProgramLayout() {
   }, [programId]);
 
   const navItems = [
-    { icon: <ChartArea size={18} />, label: 'Overview',       path: basePath },
-    { icon: <Book size={18} />,      label: 'Unit Standards', path: `${basePath}/unit-standards` },
-    { icon: <Users size={18} />,     label: 'Learners',       path: `${basePath}/learners` },
+    { icon: <ChartArea size={18} />, label: 'Overview', path: basePath, exact: true },
+    { icon: <Book size={18} />, label: 'Unit Standards', path: `${basePath}/unit-standards` },
+    { icon: <Users size={18} />, label: 'Learners', path: `${basePath}/learners` },
+    { icon: <Activity size={18} />, label: 'Activities', path: `${basePath}/activities` },
   ];
-
   const programBadge = program ? (
     <div className="px-3 py-2 bg-zinc-900 rounded-lg">
       <div className="text-[10px] font-bold text-[#E30613] tracking-[0.2em] uppercase">
